@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Reviews, Comments, Titles
+from reviews.models import Reviews, Comments, Titles
 from rest_framework.relations import SlugRelatedField
 from django.db.models import Avg
 from rest_framework.validators import UniqueTogetherValidator

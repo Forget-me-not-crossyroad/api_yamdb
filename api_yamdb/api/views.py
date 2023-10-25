@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .models import Titles
+from reviews.models import Titles
 from .serializers import ReviewsSerializer, CommentsSerializer
 from django.shortcuts import get_object_or_404
 
