@@ -37,6 +37,7 @@ class Titles(models.Model):
 
 
 class Categories(models.Model):
+    
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
