@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from reviews.models import Titles
-from .serializers import ReviewsSerializer, CommentsSerializer
+from reviews.models import Categories, Genres, Titles
+from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesSerializer
 from django.shortcuts import get_object_or_404
 
 
@@ -27,9 +27,33 @@ class CommentsViewSet(viewsets.ModelViewSet):
         return review.comments.all()
 
     def perform_create(self, serializer):
-        title=get_object_or_404(Titles, pk=self.kwargs['title_id'])
+        title = get_object_or_404(Titles, pk=self.kwargs['title_id'])
         serializer.save(
             author=self.request.user,
             title=title,
             review=get_object_or_404(title.reviews, pk=self.kwargs['review_id'])
         )
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    """ViewSet для модели Title."""
+
+    queryset = Titles.objects.all()
+    serializer_class = TitlesSerializer
+    # pagination_class = LimitOffsetPagination
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CategoriesViewSet(viewsets.ModelViewSet):
+    """ViewSet для модели Categories."""
+
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
+
+
+class GenresViewSet(viewsets.ModelViewSet):
+    """ViewSet для модели Categories."""
+
+    queryset = Genres.objects.all()
+    serializer_class = GenresSerializer
