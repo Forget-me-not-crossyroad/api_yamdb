@@ -37,7 +37,7 @@ class Titles(models.Model):
 
 
 class Categories(models.Model):
-    
+
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
@@ -94,6 +94,8 @@ class Reviews(models.Model):
     )
 
     class Meta:
+        verbose_name = "отзыв"
+        verbose_name_plural = "Отзывы"
         constraints = (
             models.UniqueConstraint(
                 fields=('title', 'author'),
@@ -103,12 +105,6 @@ class Reviews(models.Model):
 
 
 class Comments(models.Model):
-    title = models.ForeignKey(
-        Titles,
-        on_delete=models.CASCADE,
-        verbose_name='Произведение',
-        related_name='comments'
-    )
     rewiew = models.ForeignKey(
         Reviews,
         on_delete=models.CASCADE,
@@ -126,10 +122,3 @@ class Comments(models.Model):
         'Дата и время публикации',
         auto_now_add=True
     )
-
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genres, on_delete=models.CASCADE)
-    title = models.ForeignKey(Titles, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.genre} {self.title}'
