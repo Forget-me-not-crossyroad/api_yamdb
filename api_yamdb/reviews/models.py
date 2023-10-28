@@ -6,15 +6,67 @@ Users = get_user_model()
 
 
 class Titles(models.Model):
-    pass
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название',
+        help_text=('Название произведения; не более 256 символов')
+    )
+    year = models.DateField(
+        verbose_name='Год выпуска',
+        help_text=('Год выпуска; целочисленное значение года')
+    )
+    description = models.TextField(
+        verbose_name='Описание',
+        help_text='Текст описания произведения'
+    )
+    genre = models.ManyToManyField(
+        'Genres',
+        through='GenreTitle',
+        verbose_name='Внешний ключ таблицы жанр',
+        help_text='Array of strings (Slug жанра)'
+    )
+    category = models.ForeignKey(
+        'Categories',
+        on_delete=models.CASCADE,
+        verbose_name='Внешний ключ таблицы категория',
+        help_text='string (Slug категории)'
+    )
+
+    def __str__(self):
+        return self.name
 
 
 class Categories(models.Model):
-    pass
+
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название',
+        help_text=('Название категории; не более 256 символов')
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='Идентификатор',
+        help_text=('Идентификатор страницы для URL; разрешены символы'
+                   ' латиницы, цифры, дефис и подчёркивание.'
+                   'Не более 50символов')
+    )
 
 
 class Genres(models.Model):
-    pass
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название',
+        help_text=('Название категории; не более 256 символов')
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='Идентификатор',
+        help_text=('Идентификатор страницы для URL; разрешены символы'
+                   ' латиницы, цифры, дефис и подчёркивание.'
+                   'Не более 50символов')
+    )
 
 
 class Reviews(models.Model):
@@ -70,7 +122,3 @@ class Comments(models.Model):
         'Дата и время публикации',
         auto_now_add=True
     )
-
-    class Meta:
-        verbose_name = "комментарий"
-        verbose_name_plural = "Комментарии"

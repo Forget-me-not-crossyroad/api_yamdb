@@ -4,8 +4,21 @@ from rest_framework.relations import SlugRelatedField
 from django.db.models import Avg
 from rest_framework.validators import UniqueTogetherValidator
 
+CATEGORIES_CHOICES = {'Фильмы', 'Книги', 'Музыка'}
+
+class CategoriesNameChoice(serializers.Field):
+
+    def to_representation(self, value):
+        return value
+    def to_internal_value(self, data):
+        if data not in CATEGORIES_CHOICES:
+            raise serializers.ValidationError('Этой категории нет в списке')
+        return data
+
+
 class TitlesSerializer(serializers.ModelSerializer):
     raiting = serializers.SerializerMethodField()
+    category = CategoriesNameChoice()
 
     def get_raiting(self, title_object):
         raiting = title_object.reviews.all().aggregate(Avg('score'))['score__avg']
