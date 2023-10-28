@@ -30,6 +30,5 @@ class CommentsViewSet(viewsets.ModelViewSet):
         title=get_object_or_404(Titles, pk=self.kwargs['title_id'])
         serializer.save(
             author=self.request.user,
-            title=title,
             review=get_object_or_404(title.reviews, pk=self.kwargs['review_id'])
         )
