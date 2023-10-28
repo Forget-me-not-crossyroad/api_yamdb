@@ -8,7 +8,10 @@ class TitlesSerializer(serializers.ModelSerializer):
     raiting = serializers.SerializerMethodField()
 
     def get_raiting(self, title_object):
-        title_object.reviews.all().aggregate(Avg('score'))['score__avg']
+        raiting = title_object.reviews.all().aggregate(Avg('score'))['score__avg']
+        if raiting:
+            return int(raiting)
+        return raiting
 
     class Meta:
         model = Titles
