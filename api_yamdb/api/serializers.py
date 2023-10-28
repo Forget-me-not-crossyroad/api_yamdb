@@ -31,6 +31,20 @@ class TitlesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CategoriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Titles
+        fields = '__all__'
+
+
+class GenresSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Titles
+        fields = '__all__'
+
+
 class ReviewsSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
     class Meta:

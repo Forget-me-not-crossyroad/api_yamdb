@@ -1,5 +1,5 @@
 from rest_framework.routers import SimpleRouter
-from .views import ReviewsViewSet, CommentsViewSet
+from .views import CategoriesViewSet, GenresViewSet, ReviewsViewSet, CommentsViewSet, TitlesViewSet
 from django.urls import path, include
 
 router_v1 = SimpleRouter()
@@ -13,7 +13,13 @@ router_v1.register(
     CommentsViewSet,
     basename='comments'
 )
+router_v1.register('titles', TitlesViewSet)
+router_v1.register('genres', GenresViewSet)
+router_v1.register('categories', CategoriesViewSet)
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
+    path(
+        'v1/', include('djoser.urls.jwt'),
+    ),  # Эндпоинт для получения Token
 ]
