@@ -49,6 +49,7 @@ class CategoriesViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Categories."""
 
     queryset = Categories.objects.all()
+    lookup_field = "slug"
     serializer_class = CategoriesSerializer
 
 
@@ -56,4 +57,5 @@ class GenresViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Categories."""
 
     queryset = Genres.objects.all()
+    lookup_field = "slug"
     serializer_class = GenresSerializer
