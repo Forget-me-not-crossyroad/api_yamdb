@@ -1,8 +1,12 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
+from django.dispatch import receiver
+from django.core.exceptions import ValidationError
 
 Users = get_user_model()
+
+USER_GROUPS = ['user', 'moderator', 'admin']
 
 
 class Titles(models.Model):
@@ -127,9 +131,37 @@ class Comments(models.Model):
         auto_now_add=True
     )
 
+
 class GenreTitle(models.Model):
     genre = models.ForeignKey(Genres, on_delete=models.CASCADE)
     title = models.ForeignKey(Titles, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.genre} {self.title}'
+
+
+def validate_profile_group(value):
+    if value in USER_GROUPS:
+        return value
+    else:
+        raise ValidationError('Некорректная группа пользователя.')
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(Users,
+                                on_delete=models.CASCADE,
+                                related_name='user')
+    bio = models.TextField(max_length=500,
+                           blank=True)
+    role = models.CharField(max_length=15,
+                            blank=False,
+                            default='user',
+                            validators=[validate_profile_group],
+                            verbose_name='Группа пользователя',
+                            help_text='Одна из: user, moderator, admin')
+
+
+@receiver(models.signals.post_save, sender=Users)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
