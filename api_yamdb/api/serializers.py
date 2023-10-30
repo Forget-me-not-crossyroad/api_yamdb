@@ -45,10 +45,7 @@ class TitlesSerializer(serializers.ModelSerializer):
         fields = ('name', 'year', 'description', 'genre', 'category')
 
 
-class CategoriesSerializer(mixins.ListModelMixin,
-                           mixins.CreateModelMixin,
-                           mixins.DestroyModelMixin,
-                           viewsets.GenericViewSet):
+class CategoriesSerializer(serializers.ModelSerializer):
     name = serializers.ChoiceField(choices=CHOICES)
 
     class Meta:
@@ -56,10 +53,7 @@ class CategoriesSerializer(mixins.ListModelMixin,
         fields = ('name', 'slug')
 
 
-class GenresSerializer(mixins.ListModelMixin,
-                       mixins.CreateModelMixin,
-                       mixins.DestroyModelMixin,
-                       viewsets.GenericViewSet):
+class GenresSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genres

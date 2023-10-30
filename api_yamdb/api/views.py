@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from reviews.models import Categories, Genres, Titles
 from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesSerializer
 from django.shortcuts import get_object_or_404
@@ -43,7 +43,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class CategoriesViewSet(viewsets.ModelViewSet):
+class CategoriesViewSet(mixins.ListModelMixin,
+                        mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet):
     """ViewSet для модели Categories."""
 
     queryset = Categories.objects.all()
@@ -51,7 +54,10 @@ class CategoriesViewSet(viewsets.ModelViewSet):
     serializer_class = CategoriesSerializer
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(mixins.ListModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet):
     """ViewSet для модели Categories."""
 
     queryset = Genres.objects.all()
