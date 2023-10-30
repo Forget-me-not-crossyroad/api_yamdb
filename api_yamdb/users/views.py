@@ -1,10 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
 
-from reviews.models import Users, UserProfile
+from reviews.models import Users
 from .serializers import UserSerializer
 
 
 class UserViewSet(ModelViewSet):
-    queryset = UserProfile.objects.all()
+    queryset = Users.objects.all()
     serializer_class = UserSerializer
 

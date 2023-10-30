@@ -160,6 +160,10 @@ class UserProfile(models.Model):
                             verbose_name='Группа пользователя',
                             help_text='Одна из: user, moderator, admin')
 
+    def __str__(self):
+        return self.bio, self.role
+
+
 
 @receiver(models.signals.post_save, sender=Users)
 def create_user_profile(sender, instance, created, **kwargs):
