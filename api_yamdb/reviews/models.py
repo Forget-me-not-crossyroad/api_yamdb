@@ -1,8 +1,29 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.contrib.auth.models import AbstractUser
 
-Users = get_user_model()
+USER_GROUPS = ['user', 'moderator', 'admin']
+
+
+def validate_profile_group(value):
+    if value in USER_GROUPS:
+        return value
+    else:
+        raise ValidationError('Некорректная группа пользователя.')
+
+
+class Users(AbstractUser):
+    bio = models.CharField(max_length=500, null=True, blank=True)
+    role = models.CharField(max_length=15,
+                                blank=False,
+                                default='user',
+                                validators=[validate_profile_group],
+                                verbose_name='Группа пользователя',
+                                help_text='Одна из: user, moderator, admin')
+
+    def __str__(self):
+        return self.username
 
 
 class Titles(models.Model):

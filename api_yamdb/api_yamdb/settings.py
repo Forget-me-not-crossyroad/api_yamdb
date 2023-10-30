@@ -1,5 +1,6 @@
 from pathlib import Path
-
+from datetime import timedelta
+import reviews
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,6 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
+    'authorization',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -103,3 +106,27 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+
+AUTH_USER_MODEL = 'reviews.Users'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_HOST_USER = 'dummy_for_testing@mail.ru'
+EMAIL_HOST_PASSWORD = 'cdMRs6tU1sjQi6vRbkLa'
+DEFAULT_FROM_EMAIL = 'dummy_for_testing@mail.ru'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
