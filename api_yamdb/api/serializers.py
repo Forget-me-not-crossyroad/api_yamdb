@@ -1,10 +1,18 @@
 from rest_framework import serializers
-from reviews.models import Reviews, Comments, Titles
+from reviews.models import Categories, Genres, Reviews, Comments, Titles
 from rest_framework.relations import SlugRelatedField
 from django.db.models import Avg
 from rest_framework.validators import UniqueTogetherValidator
+from rest_framework import mixins
+from rest_framework import viewsets
 
 CATEGORIES_CHOICES = {'Фильмы', 'Книги', 'Музыка'}
+
+CHOICES = (
+          ('Фильмы', 'Films'),
+          ('Книги', 'Books'),
+          ('Музыка', 'Music'),
+)
 
 class CategoriesNameChoice(serializers.Field):
 
@@ -18,7 +26,13 @@ class CategoriesNameChoice(serializers.Field):
 
 class TitlesSerializer(serializers.ModelSerializer):
     raiting = serializers.SerializerMethodField()
-    category = CategoriesNameChoice()
+    category = SlugRelatedField(queryset=Categories.objects.all(),
+                                slug_field='slug',
+                                )
+    genre = SlugRelatedField(queryset=Genres.objects.all(),
+                             slug_field='slug',
+                             many=True
+                             )
 
     def get_raiting(self, title_object):
         raiting = title_object.reviews.all().aggregate(Avg('score'))['score__avg']
@@ -28,21 +42,28 @@ class TitlesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Titles
-        fields = '__all__'
+        fields = ('name', 'year', 'description', 'genre', 'category')
 
 
-class CategoriesSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Titles
-        fields = '__all__'
-
-
-class GenresSerializer(serializers.ModelSerializer):
+class CategoriesSerializer(mixins.ListModelMixin,
+                           mixins.CreateModelMixin,
+                           mixins.DestroyModelMixin,
+                           viewsets.GenericViewSet):
+    name = serializers.ChoiceField(choices=CHOICES)
 
     class Meta:
         model = Titles
-        fields = '__all__'
+        fields = ('name', 'slug')
+
+
+class GenresSerializer(mixins.ListModelMixin,
+                       mixins.CreateModelMixin,
+                       mixins.DestroyModelMixin,
+                       viewsets.GenericViewSet):
+
+    class Meta:
+        model = Genres
+        fields = ('name', 'slug')
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
