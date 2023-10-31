@@ -3,9 +3,6 @@ from reviews.models import Categories, Genres, Reviews, Comments, Titles, Users
 from rest_framework.relations import SlugRelatedField
 from django.db.models import Avg
 from rest_framework.validators import UniqueTogetherValidator
-from rest_framework import mixins
-from rest_framework import viewsets
-# from api.serializers import GenresSerializer, CategoriesSerializer
 
 CATEGORIES_CHOICES = {'Фильмы', 'Книги', 'Музыка'}
 
@@ -15,21 +12,12 @@ CHOICES = (
           ('Музыка', 'Music'),
 )
 
-class CategoriesNameChoice(serializers.Field):
-
-    def to_representation(self, value):
-        return value
-    def to_internal_value(self, data):
-        if data not in CATEGORIES_CHOICES:
-            raise serializers.ValidationError('Этой категории нет в списке')
-        return data
-
 
 class CategoriesSerializer(serializers.ModelSerializer):
-    name = serializers.ChoiceField(choices=CHOICES)
+    # name = serializers.ChoiceField(choices=CHOICES)
 
     class Meta:
-        model = Titles
+        model = Categories
         fields = ('name', 'slug')
 
 
@@ -40,7 +28,7 @@ class GenresSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitlesGetSerializer(serializers.ModelSerializer):
+class TitlesWriteSerializer(serializers.ModelSerializer):
     category = SlugRelatedField(queryset=Categories.objects.all(),
                                 slug_field='slug',
                                 )
@@ -51,10 +39,10 @@ class TitlesGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Titles
-        fields = ('category', 'genre', 'name', 'year')
+        fields = ('id', 'category', 'genre', 'name', 'year')
 
 
-class TitlesWriteSerializer(serializers.ModelSerializer):
+class TitlesGetSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     category = CategoriesSerializer()
     genre = GenresSerializer(many=True)

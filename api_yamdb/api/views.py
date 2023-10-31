@@ -54,6 +54,7 @@ class CategoriesViewSet(mixins.ListModelMixin,
     """ViewSet для модели Categories."""
 
     queryset = Categories.objects.all()
+    search_fields = ('name',)
     lookup_field = "slug"
     serializer_class = CategoriesSerializer
 
@@ -65,5 +66,6 @@ class GenresViewSet(mixins.ListModelMixin,
     """ViewSet для модели Categories."""
 
     queryset = Genres.objects.all()
+    search_fields = ('name',)
     lookup_field = "slug"
     serializer_class = GenresSerializer
