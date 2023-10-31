@@ -37,7 +37,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Title."""
 
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+    serializer_class = TitlesGetSerializer
 
     def get_serializer_class(self):
         if self.request.method == "GET":
