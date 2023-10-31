@@ -5,6 +5,7 @@ from django.db.models import Avg
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework import mixins
 from rest_framework import viewsets
+# from api.serializers import GenresSerializer, CategoriesSerializer
 
 CATEGORIES_CHOICES = {'Фильмы', 'Книги', 'Музыка'}
 
@@ -22,28 +23,7 @@ class CategoriesNameChoice(serializers.Field):
         if data not in CATEGORIES_CHOICES:
             raise serializers.ValidationError('Этой категории нет в списке')
         return data
-
-
-class TitlesSerializer(serializers.ModelSerializer):
-    raiting = serializers.SerializerMethodField()
-    category = SlugRelatedField(queryset=Categories.objects.all(),
-                                slug_field='slug',
-                                )
-    genre = SlugRelatedField(queryset=Genres.objects.all(),
-                             slug_field='slug',
-                             many=True
-                             )
-
-    def get_raiting(self, title_object):
-        raiting = title_object.reviews.all().aggregate(Avg('score'))['score__avg']
-        if raiting:
-            return int(raiting)
-        return raiting
-
-    class Meta:
-        model = Titles
-        fields = ('name', 'year', 'description', 'genre', 'category')
-
+    
 
 class CategoriesSerializer(serializers.ModelSerializer):
     name = serializers.ChoiceField(choices=CHOICES)
@@ -58,6 +38,36 @@ class GenresSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genres
         fields = ('name', 'slug')
+
+
+class TitlesCreateSerializer(serializers.ModelSerializer):
+    category = SlugRelatedField(queryset=Categories.objects.all(),
+                                slug_field='slug',
+                                )
+    genre = SlugRelatedField(queryset=Genres.objects.all(),
+                             slug_field='slug',
+                             many=True
+                             )
+
+    class Meta:
+        model = Titles
+        fields = ('name', 'year', 'description', 'genre', 'category')
+
+
+class TitlesGetSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+    category = CategoriesSerializer()
+    genre = GenresSerializer(many=True)
+
+    def get_rating(self, title_object):
+        rating = title_object.reviews.all().aggregate(Avg('score'))['score__avg']
+        if rating:
+            return int(rating)
+        return rating
+
+    class Meta:
+        model = Titles
+        fields = ('name', 'year', 'description', 'genre', 'category', 'rating')
 
 
 class ReviewsSerializer(serializers.ModelSerializer):

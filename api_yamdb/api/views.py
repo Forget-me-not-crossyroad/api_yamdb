@@ -1,6 +1,6 @@
 from rest_framework import viewsets, mixins
 from reviews.models import Categories, Genres, Titles
-from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesSerializer
+from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesCreateSerializer, TitlesGetSerializer, TitlesSerializer
 from django.shortcuts import get_object_or_404
 
 
@@ -38,6 +38,11 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return TitlesGetSerializer
+        return TitlesCreateSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
