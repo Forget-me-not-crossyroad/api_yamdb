@@ -32,11 +32,12 @@ class Titles(models.Model):
         verbose_name='Название',
         help_text=('Название произведения; не более 256 символов')
     )
-    year = models.DateField(
+    year = models.IntegerField(
         verbose_name='Год выпуска',
         help_text=('Год выпуска; целочисленное значение года')
     )
     description = models.TextField(
+        blank=True,
         verbose_name='Описание',
         help_text='Текст описания произведения'
     )
@@ -48,7 +49,8 @@ class Titles(models.Model):
     )
     category = models.ForeignKey(
         'Categories',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         verbose_name='Внешний ключ таблицы категория',
         help_text='string (Slug категории)'
     )
@@ -58,15 +60,14 @@ class Titles(models.Model):
 
 
 class Categories(models.Model):
-
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
         help_text=('Название категории; не более 256 символов')
     )
     slug = models.SlugField(
-        max_length=50,
         unique=True,
+        db_index=True,
         verbose_name='Идентификатор',
         help_text=('Идентификатор страницы для URL; разрешены символы'
                    ' латиницы, цифры, дефис и подчёркивание.'
@@ -81,8 +82,8 @@ class Genres(models.Model):
         help_text=('Название категории; не более 256 символов')
     )
     slug = models.SlugField(
-        max_length=50,
         unique=True,
+        db_index=True,
         verbose_name='Идентификатор',
         help_text=('Идентификатор страницы для URL; разрешены символы'
                    ' латиницы, цифры, дефис и подчёркивание.'

@@ -1,7 +1,8 @@
 from rest_framework import viewsets, mixins
 from reviews.models import Categories, Genres, Titles
-from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesCreateSerializer, TitlesGetSerializer, TitlesSerializer
+from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesWriteSerializer, TitlesGetSerializer
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class ReviewsViewSet(viewsets.ModelViewSet):
@@ -37,15 +38,13 @@ class TitlesViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Title."""
 
     queryset = Titles.objects.all()
-    serializer_class = TitlesGetSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre', 'name', 'year')
 
     def get_serializer_class(self):
-        if self.request.method == "GET":
+        if self.action == 'list':
             return TitlesGetSerializer
-        return TitlesCreateSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        return TitlesWriteSerializer
 
 
 class CategoriesViewSet(mixins.ListModelMixin,
