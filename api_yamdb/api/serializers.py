@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from reviews.models import Categories, Genres, Reviews, Comments, Titles, Users
+from reviews.models import Category, Genre, Review, Comment, Title, Users
 from rest_framework.relations import SlugRelatedField
 from django.db.models import Avg
-from rest_framework.validators import UniqueTogetherValidator
 
 CATEGORIES_CHOICES = {'Фильмы', 'Книги', 'Музыка'}
 
@@ -17,31 +16,31 @@ class CategoriesSerializer(serializers.ModelSerializer):
     # name = serializers.ChoiceField(choices=CHOICES)
 
     class Meta:
-        model = Categories
+        model = Category
         fields = ('name', 'slug')
-        lookup_field = 'slug'
 
 
 class GenresSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Genres
+        model = Genre
         fields = ('name', 'slug')
-        lookup_field = 'slug'
 
 
 class TitlesWriteSerializer(serializers.ModelSerializer):
-    category = SlugRelatedField(queryset=Categories.objects.all(),
-                                slug_field='slug',
-                                )
-    genre = SlugRelatedField(queryset=Genres.objects.all(),
-                             slug_field='slug',
-                             many=True
-                             )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
 
     class Meta:
-        model = Titles
-        fields = ('category', 'genre', 'name', 'year')
+        model = Title
+        fields = ('id', 'category', 'genre', 'name', 'year', 'description')
 
 
 class TitlesGetSerializer(serializers.ModelSerializer):
@@ -59,19 +58,30 @@ class TitlesGetSerializer(serializers.ModelSerializer):
         return rating
 
     class Meta:
-        model = Titles
+        model = Title
         fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
     class Meta:
-        model = Reviews
+        model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('id',)
+
+    def validate(self, data):
+        if (Review.objects.filter(
+                author=self.context.get('request').user,
+                title=self.context.get('view').kwargs.get('title_id')
+            ).exists() and self.context.get('request').method == 'POST'):
+            raise serializers.ValidationError(
+                'Вы уже оставляли отзыв на это произведение'
+        )
+        return data
 
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
     class Meta:
-        model = Comments
+        model = Comment
         fields = ('id', 'text', 'author', 'pub_date')

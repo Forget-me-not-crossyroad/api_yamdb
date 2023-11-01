@@ -26,7 +26,7 @@ class Users(AbstractUser):
         return self.username
 
 
-class Genres(models.Model):
+class Genre(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
@@ -42,7 +42,22 @@ class Genres(models.Model):
     )
 
 
-class Titles(models.Model):
+class Category(models.Model):
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название',
+        help_text=('Название категории; не более 256 символов')
+    )
+    slug = models.SlugField(
+        unique=True,
+        db_index=True,
+        verbose_name='Идентификатор',
+        help_text=('Идентификатор страницы для URL; разрешены символы'
+                   ' латиницы, цифры, дефис и подчёркивание.'
+                   'Не более 50символов')
+    )
+
+class Title(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
@@ -58,12 +73,13 @@ class Titles(models.Model):
         help_text='Текст описания произведения'
     )
     genre = models.ManyToManyField(
-        Genres,
+        Genre,
+        through='GenreTitle',
         related_name='titles',
         verbose_name='Жанр'
     )
     category = models.ForeignKey(
-        'Categories',
+        Category,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name='Внешний ключ таблицы категория',
@@ -74,25 +90,9 @@ class Titles(models.Model):
         return self.name
 
 
-class Categories(models.Model):
-    name = models.CharField(
-        max_length=256,
-        verbose_name='Название',
-        help_text=('Название категории; не более 256 символов')
-    )
-    slug = models.SlugField(
-        unique=True,
-        db_index=True,
-        verbose_name='Идентификатор',
-        help_text=('Идентификатор страницы для URL; разрешены символы'
-                   ' латиницы, цифры, дефис и подчёркивание.'
-                   'Не более 50символов')
-    )
-
-
-class Reviews(models.Model):
+class Review(models.Model):
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         verbose_name='Произведение',
         related_name='reviews'
@@ -126,9 +126,9 @@ class Reviews(models.Model):
         )
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     review = models.ForeignKey(
-        Reviews,
+        Review,
         on_delete=models.CASCADE,
         verbose_name='Отзыв',
         related_name='comments'
@@ -147,8 +147,8 @@ class Comments(models.Model):
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genres, on_delete=models.CASCADE)
-    title = models.ForeignKey(Titles, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.genre} {self.title}'
