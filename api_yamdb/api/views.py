@@ -3,10 +3,11 @@ from reviews.models import Categories, Genres, Titles
 from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesWriteSerializer, TitlesGetSerializer
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-
+from rest_framework.exceptions import MethodNotAllowed
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
+    http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         title = get_object_or_404(Titles, pk=self.kwargs['title_id'])
@@ -21,6 +22,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
 class CommentsViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
+    http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         title = get_object_or_404(Titles, pk=self.kwargs['title_id'])
@@ -34,17 +36,19 @@ class CommentsViewSet(viewsets.ModelViewSet):
             review=get_object_or_404(title.reviews, pk=self.kwargs['review_id'])
         )
 
+
 class TitlesViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Title."""
 
     queryset = Titles.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
+    http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return TitlesGetSerializer
-        return TitlesWriteSerializer
+            return TitlesWriteSerializer
+        return TitlesGetSerializer
 
 
 class CategoriesViewSet(mixins.ListModelMixin,

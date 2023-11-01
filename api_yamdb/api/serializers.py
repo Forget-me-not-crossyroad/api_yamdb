@@ -19,6 +19,7 @@ class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categories
         fields = ('name', 'slug')
+        lookup_field = 'slug'
 
 
 class GenresSerializer(serializers.ModelSerializer):
@@ -26,6 +27,7 @@ class GenresSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genres
         fields = ('name', 'slug')
+        lookup_field = 'slug'
 
 
 class TitlesWriteSerializer(serializers.ModelSerializer):
@@ -39,13 +41,16 @@ class TitlesWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Titles
-        fields = ('id', 'category', 'genre', 'name', 'year')
+        fields = ('category', 'genre', 'name', 'year')
 
 
 class TitlesGetSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
-    category = CategoriesSerializer()
-    genre = GenresSerializer(many=True)
+    rating = serializers.SerializerMethodField(read_only=True)
+    category = CategoriesSerializer(read_only=True)
+    genre = GenresSerializer(
+        read_only=True,
+        many=True
+    )
 
     def get_rating(self, title_object):
         rating = title_object.reviews.all().aggregate(Avg('score'))['score__avg']
@@ -55,7 +60,7 @@ class TitlesGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Titles
-        fields = ('name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
@@ -63,16 +68,6 @@ class ReviewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reviews
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Reviews.objects.all(),
-                fields=['title', 'author'],
-                message=(
-                    'Вы можете оставить только '
-                    'один отзыв к этому произведению'
-                )
-            )
-        ]
 
 
 class CommentsSerializer(serializers.ModelSerializer):

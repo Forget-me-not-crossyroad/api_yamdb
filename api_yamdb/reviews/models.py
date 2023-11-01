@@ -26,6 +26,22 @@ class Users(AbstractUser):
         return self.username
 
 
+class Genres(models.Model):
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название',
+        help_text=('Название категории; не более 256 символов')
+    )
+    slug = models.SlugField(
+        unique=True,
+        db_index=True,
+        verbose_name='Идентификатор',
+        help_text=('Идентификатор страницы для URL; разрешены символы'
+                   ' латиницы, цифры, дефис и подчёркивание.'
+                   'Не более 50символов')
+    )
+
+
 class Titles(models.Model):
     name = models.CharField(
         max_length=256,
@@ -42,10 +58,9 @@ class Titles(models.Model):
         help_text='Текст описания произведения'
     )
     genre = models.ManyToManyField(
-        'Genres',
-        through='GenreTitle',
-        verbose_name='Внешний ключ таблицы жанр',
-        help_text='Array of strings (Slug жанра)'
+        Genres,
+        related_name='titles',
+        verbose_name='Жанр'
     )
     category = models.ForeignKey(
         'Categories',
@@ -75,22 +90,6 @@ class Categories(models.Model):
     )
 
 
-class Genres(models.Model):
-    name = models.CharField(
-        max_length=256,
-        verbose_name='Название',
-        help_text=('Название категории; не более 256 символов')
-    )
-    slug = models.SlugField(
-        unique=True,
-        db_index=True,
-        verbose_name='Идентификатор',
-        help_text=('Идентификатор страницы для URL; разрешены символы'
-                   ' латиницы, цифры, дефис и подчёркивание.'
-                   'Не более 50символов')
-    )
-
-
 class Reviews(models.Model):
     title = models.ForeignKey(
         Titles,
@@ -101,8 +100,9 @@ class Reviews(models.Model):
     text = models.TextField(
         'Текст'
     )
-    author = models.OneToOneField(
-        Users, on_delete=models.CASCADE,
+    author = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
         verbose_name='Автор отзыва',
         related_name='reviews'
     )
@@ -127,7 +127,7 @@ class Reviews(models.Model):
 
 
 class Comments(models.Model):
-    rewiew = models.ForeignKey(
+    review = models.ForeignKey(
         Reviews,
         on_delete=models.CASCADE,
         verbose_name='Отзыв',
