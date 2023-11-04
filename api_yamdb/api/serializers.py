@@ -42,12 +42,14 @@ class TitlesWriteSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'category', 'genre', 'name', 'year', 'description')
 
+    def to_representation(self, instance):
+        return TitlesGetSerializer(instance).data
+
 
 class TitlesGetSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField(read_only=True)
-    category = CategoriesSerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
+    category = CategoriesSerializer()
     genre = GenresSerializer(
-        read_only=True,
         many=True
     )
 
@@ -75,7 +77,7 @@ class ReviewsSerializer(serializers.ModelSerializer):
                 title=self.context.get('view').kwargs.get('title_id')
             ).exists() and self.context.get('request').method == 'POST'):
             raise serializers.ValidationError(
-                'Вы уже оставляли отзыв на это произведение'
+                'Вы можете оставить только один отзыв на произведение'
         )
         return data
 

@@ -15,6 +15,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         return title.reviews.all()
 
     def perform_create(self, serializer):
+        print(serializer)
         serializer.save(
             author=self.request.user,
             title=get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -47,7 +48,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.action in ('list', 'retrieve'):
             return TitlesGetSerializer
         return TitlesWriteSerializer
 
