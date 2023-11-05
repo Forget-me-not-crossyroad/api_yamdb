@@ -1,6 +1,5 @@
 from pathlib import Path
 from datetime import timedelta
-import reviews
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

@@ -53,18 +53,21 @@ class TitlesGetSerializer(serializers.ModelSerializer):
     )
 
     def get_rating(self, title_object):
-        rating = title_object.reviews.all().aggregate(Avg('score'))['score__avg']
+        rating = title_object.reviews.all().aggregate(
+            Avg('score'))['score__avg']
         if rating:
             return int(rating)
         return rating
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
+
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
@@ -73,16 +76,18 @@ class ReviewsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if (Review.objects.filter(
                 author=self.context.get('request').user,
-                title=self.context.get('view').kwargs.get('title_id')
-            ).exists() and self.context.get('request').method == 'POST'):
+                title=self.context.get('view').kwargs.get('title_id')).exists()
+                and self.context.get('request').method == 'POST'):
             raise serializers.ValidationError(
                 'Вы можете оставить только один отзыв на произведение'
-        )
+            )
+
         return data
 
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
+
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')

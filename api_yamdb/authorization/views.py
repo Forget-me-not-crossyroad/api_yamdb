@@ -34,10 +34,8 @@ def send_confirmation_code(request):
         return Response(
             {'email': [], 'username': ['Отсутствует поле.']},
             status=status.HTTP_400_BAD_REQUEST)
-    elif (len(profile) == 0 or
-          len(profile) > 150 or
-          profile == 'me' or
-          not re.fullmatch(
+    elif (len(profile) == 0 or len(profile) > 150 or profile == 'me'
+          or not re.fullmatch(
               r'^[a-zA-Z0-9_.+-]+$',
               profile)):
         return Response(
@@ -47,9 +45,8 @@ def send_confirmation_code(request):
     if not mail:
         return Response({'email': ['Отсутствует поле.'], 'username': []},
                         status=status.HTTP_400_BAD_REQUEST)
-    elif (len(mail) == 0 or
-          len(mail) > 254 or
-          not re.fullmatch(
+    elif (len(mail) == 0 or len(mail) > 254
+          or not re.fullmatch(
               r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
               mail)):
         return Response(
@@ -98,7 +95,7 @@ def obtain_token(request):
 
     if user.check_password(request.data.get('confirmation_code')):
         refresh = RefreshToken.for_user(user)
-        content = {'token': str(refresh.access_token),}
+        content = {'token': str(refresh.access_token), }
         return Response(content, status=status.HTTP_200_OK)
     else:
         return Response({'password': ['Неверный пароль.'], },

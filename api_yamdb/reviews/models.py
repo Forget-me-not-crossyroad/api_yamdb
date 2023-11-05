@@ -23,9 +23,8 @@ def validate_user_name(value):
 
 
 def validate_email(value):
-    if (len(value) == 0 or
-            len(value) > 254 or
-            not re.fullmatch(
+    if (len(value) == 0 or len(value) > 254
+            or not re.fullmatch(
                 r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
                 value)):
         raise ValidationError("Некорректное имя пользователя")
@@ -45,12 +44,12 @@ class Users(AbstractUser):
     last_name = models.CharField(max_length=150,
                                  blank=True)
     bio = models.CharField(max_length=500, null=True, blank=True)
-    role = models.CharField(max_length=15,
-                                blank=False,
-                                default='user',
-                                validators=[validate_profile_group],
-                                verbose_name='Группа пользователя',
-                                help_text='Одна из: user, moderator, admin')
+    role = models.CharField(
+        max_length=15, blank=False, default='user',
+        validators=[validate_profile_group],
+        verbose_name='Группа пользователя',
+        help_text='Одна из: user, moderator, admin'
+    )
 
     def __str__(self):
         return self.username
@@ -86,6 +85,7 @@ class Category(models.Model):
                    ' латиницы, цифры, дефис и подчёркивание.'
                    'Не более 50символов')
     )
+
 
 class Title(models.Model):
     name = models.CharField(
