@@ -2,6 +2,8 @@ from rest_framework.routers import SimpleRouter
 from .views import CategoriesViewSet, GenresViewSet, ReviewsViewSet, CommentsViewSet, TitlesViewSet
 from django.urls import path, include
 
+from users.views import UsersModelViewSet
+
 router_v1 = SimpleRouter()
 router_v1.register(
     r'titles/(?P<title_id>\d+)/reviews',
@@ -16,9 +18,8 @@ router_v1.register(
 router_v1.register('titles', TitlesViewSet)
 router_v1.register('genres', GenresViewSet)
 router_v1.register('categories', CategoriesViewSet)
+router_v1.register('users', UsersModelViewSet)
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
-    #path('v1/', include('djoser.urls.jwt')),
-    # Эндпоинт для получения Token
 ]

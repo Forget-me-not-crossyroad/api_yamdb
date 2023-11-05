@@ -1,23 +1,30 @@
-"""
-Аноним — может просматривать описания произведений, читать отзывы и комментарии.
-
-Аутентифицированный пользователь (user) — может читать всё, как и Аноним,
-может публиковать отзывы и ставить оценки произведениям (фильмам/книгам/песенкам),
-может комментировать отзывы; может редактировать и удалять свои отзывы и комментарии,
-редактировать свои оценки произведений. Эта роль присваивается по умолчанию каждому новому пользователю.
-
-Модератор (moderator) — те же права, что и у Аутентифицированного пользователя,
-плюс право удалять и редактировать любые отзывы и комментарии.
-
-Администратор (admin) — полные права на управление всем контентом проекта.
-Может создавать и удалять произведения, категории и жанры. Может назначать роли пользователям.
-
-Суперюзер Django должен всегда обладать правами администратора, пользователя с правами admin.
-Даже если изменить пользовательскую роль суперюзера — это не лишит его прав администратора.
-Суперюзер — всегда администратор, но администратор — не обязательно суперюзер.
-"""
-
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+from reviews.models import Users
+
+
+def is_admin_user(request):
+    if request.user.is_superuser:
+        return 'admin'
+    else:
+        user = Users.objects.get(id=request.user.id, is_active=True)
+        return user.role
+
+
+class UserPermissions(BasePermission):
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated and is_admin_user(request) == 'admin':
+            return True
+        else:
+            return False
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_authenticated and is_admin_user(request) == 'admin':
+            return True
+        else:
+            return False
+        # return obj.author == request.user or request.user.is_superuser
 
 
 class CommonTopicsPermissions(BasePermission):
@@ -26,7 +33,7 @@ class CommonTopicsPermissions(BasePermission):
         if request.user.is_superuser:
             return 'admin'
         else:
-            return UserProfile.objects.get(user_id=request.user.id).fields('role')
+            return Users.objects.get(user_id=request.user.id).fields('role')
 
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS or
@@ -43,7 +50,7 @@ class ContentPermissions(BasePermission):
         if request.user.is_superuser:
             return 'admin'
         else:
-            return UserProfile.objects.get(user_id=request.user.id).fields('role')
+            return Users.objects.get(user_id=request.user.id).fields('role')
 
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS or request.user.is_authenticated
