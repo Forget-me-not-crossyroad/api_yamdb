@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from reviews.models import Category, Genre, Review, Comment, Title, Users
+from reviews.models import Category, Genre, Review, Comment, Title
 from rest_framework.relations import SlugRelatedField
 from django.db.models import Avg
 
@@ -13,7 +13,6 @@ CHOICES = (
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
-    # name = serializers.ChoiceField(choices=CHOICES)
 
     class Meta:
         model = Category

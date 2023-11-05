@@ -3,7 +3,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from http import HTTPStatus
 import re
@@ -28,7 +27,6 @@ def provide_password(exist, username, mail):
 @api_view(['POST'])
 def send_confirmation_code(request):
 
-    # try:
     profile = request.data.get('username')
     mail = request.data.get('email')
 
@@ -64,7 +62,9 @@ def send_confirmation_code(request):
             {'email': ['Некорректный email.'], 'username': []},
             status=status.HTTP_400_BAD_REQUEST)
 
-    if Users.objects.filter(username=profile, email=mail, is_active=True).exists():
+    if Users.objects.filter(username=profile,
+                            email=mail,
+                            is_active=True).exists():
         pwd = provide_password(True, profile, mail)
     elif Users.objects.filter(username=profile, is_active=True).exists():
         return Response(
@@ -76,27 +76,30 @@ def send_confirmation_code(request):
     msg = EmailMessage(f'Код подтверждения для {profile}.',
                        f'Ваш код подтверждения: {pwd}',
                        to=[mail])
-
-    # print(f'Убрать заглушку в authorization/views для отправки сообщения на почту - Ваш код подтверждения: {pwd}')
     msg.send()
 
-    return Response({'email': mail, 'username': profile}, status=status.HTTP_200_OK)
+    return Response({'email': mail, 'username': profile},
+                    status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 def obtain_token(request):
 
     if not request.data.get('username'):
-        return Response({'username': ['Отсутствует поле username.'], }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'username': ['Отсутствует поле username.'], },
+                        status=status.HTTP_400_BAD_REQUEST)
 
-    user = Users.objects.filter(username=request.data.get('username'), is_active=True).first()
+    user = Users.objects.filter(username=request.data.get('username'),
+                                is_active=True).first()
 
     if not user:
-        return Response({'username': ['Пользователь не найден'], }, status=HTTPStatus.NOT_FOUND)
+        return Response({'username': ['Пользователь не найден'], },
+                        status=HTTPStatus.NOT_FOUND)
 
     if user.check_password(request.data.get('confirmation_code')):
         refresh = RefreshToken.for_user(user)
         content = {'token': str(refresh.access_token),}
         return Response(content, status=status.HTTP_200_OK)
     else:
-        return Response({'password': ['Неверный пароль.'], }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'password': ['Неверный пароль.'], },
+                        status=status.HTTP_400_BAD_REQUEST)

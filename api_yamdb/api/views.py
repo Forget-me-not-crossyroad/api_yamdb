@@ -1,14 +1,20 @@
 from rest_framework import viewsets, mixins
 from reviews.models import Category, Genre, Title
-from .serializers import CategoriesSerializer, GenresSerializer, ReviewsSerializer, CommentsSerializer, TitlesWriteSerializer, TitlesGetSerializer
+from .serializers import (CategoriesSerializer, GenresSerializer,
+                          ReviewsSerializer, CommentsSerializer,
+                          TitlesWriteSerializer, TitlesGetSerializer)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
+
 from .filters import TitleFilter
+from .permissions import ContentPermissions, CommonTopicsPermissions
+
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
     http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
+    permission_classes = (ContentPermissions,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -25,6 +31,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 class CommentsViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
     http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
+    permission_classes = (ContentPermissions,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -35,7 +42,8 @@ class CommentsViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
         serializer.save(
             author=self.request.user,
-            review=get_object_or_404(title.reviews, pk=self.kwargs['review_id'])
+            review=get_object_or_404(title.reviews,
+                                     pk=self.kwargs['review_id'])
         )
 
 
@@ -46,6 +54,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
+    permission_classes = (CommonTopicsPermissions, )
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -64,6 +73,7 @@ class CategoriesViewSet(mixins.ListModelMixin,
     serializer_class = CategoriesSerializer
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name', )
+    permission_classes = (CommonTopicsPermissions, )
 
 
 class GenresViewSet(mixins.ListModelMixin,
@@ -78,3 +88,4 @@ class GenresViewSet(mixins.ListModelMixin,
     serializer_class = GenresSerializer
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name', )
+    permission_classes = (CommonTopicsPermissions, )

@@ -3,7 +3,6 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
-from rest_framework import status
 
 
 USER_GROUPS = ['user', 'moderator', 'admin']
@@ -15,16 +14,20 @@ def validate_profile_group(value):
     else:
         raise ValidationError('Некорректная группа пользователя.')
 
+
 def validate_user_name(value):
     if (re.fullmatch(r'^[\w.@+-]+\Z', value)):
         return value
     else:
         raise ValidationError("Некорректное имя пользователя")
 
+
 def validate_email(value):
     if (len(value) == 0 or
             len(value) > 254 or
-            not re.fullmatch(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$', value)):
+            not re.fullmatch(
+                r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+                value)):
         raise ValidationError("Некорректное имя пользователя")
 
 

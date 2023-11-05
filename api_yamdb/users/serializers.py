@@ -13,4 +13,6 @@ class UsersSerializer(ModelSerializer):
     class Meta:
         model = Users
         lookup_field = 'username'
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = ('username', 'email',
+                  'first_name', 'last_name',
+                  'bio', 'role')

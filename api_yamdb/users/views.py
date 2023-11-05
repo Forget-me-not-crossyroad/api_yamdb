@@ -33,9 +33,14 @@ class UsersModelViewSet(ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         elif request.method == 'PATCH':
 
-            serializer = self.get_serializer(user, data=request.data, partial=True)
+            serializer = self.get_serializer(user,
+                                             data=request.data,
+                                             partial=True)
 
             if serializer.is_valid():
+                if request.data.get('role') != user.role:
+                    serializer.validated_data['role'] = user.role
+
                 serializer.save()
                 return Response(serializer.data,
                                 status=status.HTTP_200_OK)
