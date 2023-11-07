@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 USER_GROUPS = ('user', 'moderator', 'admin')
 
+
 def validate_year(value):
     if value > date.today().year:
         raise ValidationError(
@@ -33,9 +34,7 @@ def validate_email(value):
     if (len(value) == 0 or len(value) > 254
         or not re.fullmatch(
             r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
-            value
-        )
-    ):
+            value)):
         raise ValidationError(
             'Некорректное имя пользователя'
         )

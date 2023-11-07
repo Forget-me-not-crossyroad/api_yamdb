@@ -1,6 +1,5 @@
 from api.mixins import UpdateModelMixin
 from api.permissions import UserPermissions
-from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -27,28 +26,22 @@ class UsersModelViewSet(
 
     @action(
         detail=False,
-        methods=['get', 'patch'],
+        methods=['get'],
         permission_classes=[IsAuthenticated]
     )
     def me(self, request):
-        user = get_object_or_404(Users, id=self.request.user.id)
-
         if request.method == 'GET':
-            serializer = self.get_serializer(user, many=False)
+            serializer = self.get_serializer(self.request.user,
+                                             many=False)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        elif request.method == 'PATCH':
 
-            serializer = self.get_serializer(user,
-                                             data=request.data,
-                                             partial=True)
+    @me.mapping.patch
+    def patch_user(self, request):
+        serializer = self.get_serializer(self.request.user,
+                                         data=request.data,
+                                         partial=True)
 
-            if serializer.is_valid():
-                if request.data.get('role') != user.role:
-                    serializer.validated_data['role'] = user.role
-
-                serializer.save()
-                return Response(serializer.data,
-                                status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.data,
-                                status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(role=self.request.user.role)
+            return Response(serializer.data,
+                            status=status.HTTP_200_OK)

@@ -5,7 +5,6 @@ from .views import obtain_token, send_confirmation_code
 name = 'auth'
 
 urlpatterns = [
-    path('', send_confirmation_code, name='send_confirmation_code'),
     path('signup/', send_confirmation_code, name='send_confirmation_code'),
     path('token/', obtain_token, name='obtain_token'),
 ]
