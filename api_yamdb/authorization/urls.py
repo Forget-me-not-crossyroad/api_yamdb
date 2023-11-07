@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import send_confirmation_code, obtain_token
+from .views import obtain_token, send_confirmation_code
 
 name = 'auth'
 

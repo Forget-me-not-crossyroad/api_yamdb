@@ -1,19 +1,26 @@
-from rest_framework import viewsets, mixins
-from reviews.models import Category, Genre, Title
-from .serializers import (CategoriesSerializer, GenresSerializer,
-                          ReviewsSerializer, CommentsSerializer,
-                          TitlesWriteSerializer, TitlesGetSerializer)
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+from rest_framework import filters, mixins, viewsets
 
 from .filters import TitleFilter
-from .permissions import ContentPermissions, CommonTopicsPermissions
+from .mixins import UpdateModelMixin
+from .permissions import CommonTopicsPermissions, ContentPermissions
+from .serializers import (CategoriesSerializer, CommentsSerializer,
+                          GenresSerializer, ReviewsSerializer,
+                          TitlesGetSerializer, TitlesWriteSerializer)
+from reviews.models import Category, Genre, Title
 
 
-class ReviewsViewSet(viewsets.ModelViewSet):
+class ReviewsViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    UpdateModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = ReviewsSerializer
-    http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
     permission_classes = (ContentPermissions,)
 
     def get_queryset(self):
@@ -21,16 +28,21 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        print(serializer)
         serializer.save(
             author=self.request.user,
             title=get_object_or_404(Title, pk=self.kwargs['title_id'])
         )
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
+class CommentsViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    UpdateModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = CommentsSerializer
-    http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
     permission_classes = (ContentPermissions,)
 
     def get_queryset(self):
@@ -47,13 +59,19 @@ class CommentsViewSet(viewsets.ModelViewSet):
         )
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitlesViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    UpdateModelMixin,
+    viewsets.GenericViewSet
+):
     """ViewSet для модели Title."""
 
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    http_method_names = ['get', 'head', 'options', 'post', 'patch', 'delete']
     permission_classes = (CommonTopicsPermissions, )
 
     def get_serializer_class(self):

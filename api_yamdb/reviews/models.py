@@ -1,55 +1,50 @@
-import re
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
-
-USER_GROUPS = ['user', 'moderator', 'admin']
-
-
-def validate_profile_group(value):
-    if value in USER_GROUPS:
-        return value
-    else:
-        raise ValidationError('Некорректная группа пользователя.')
-
-
-def validate_user_name(value):
-    if (re.fullmatch(r'^[\w.@+-]+\Z', value)):
-        return value
-    else:
-        raise ValidationError("Некорректное имя пользователя")
-
-
-def validate_email(value):
-    if (len(value) == 0 or len(value) > 254
-            or not re.fullmatch(
-                r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
-                value)):
-        raise ValidationError("Некорректное имя пользователя")
+from . import validators
+from api_yamdb.constants import (MAX_LENGTH, MAX_LENGTH_BIO, MAX_LENGTH_EMAIL,
+                                 MAX_LENGTH_NAME, MAX_LENGTH_ROLE)
 
 
 class Users(AbstractUser):
-    username = models.CharField(max_length=150,
-                                blank=False,
-                                unique=True,
-                                validators=[validate_user_name])
-    email = models.EmailField(max_length=254,
-                              blank=False,
-                              unique=True,
-                              validators=[validate_user_name])
-    first_name = models.CharField(max_length=150,
-                                  blank=True)
-    last_name = models.CharField(max_length=150,
-                                 blank=True)
-    bio = models.CharField(max_length=500, null=True, blank=True)
+    username = models.CharField(
+        max_length=MAX_LENGTH_NAME,
+        blank=False,
+        unique=True,
+        validators=[validators.validate_user_name]
+    )
+    email = models.EmailField(
+        max_length=MAX_LENGTH_EMAIL,
+        blank=False,
+        unique=True,
+        validators=[validators.validate_user_name]
+    )
+    first_name = models.CharField(
+        max_length=MAX_LENGTH_NAME,
+        blank=True
+    )
+    last_name = models.CharField(
+        max_length=MAX_LENGTH_NAME,
+        blank=True
+    )
+    bio = models.CharField(
+        max_length=MAX_LENGTH_BIO,
+        null=True,
+        blank=True
+    )
     role = models.CharField(
-        max_length=15, blank=False, default='user',
-        validators=[validate_profile_group],
+        max_length=MAX_LENGTH_ROLE,
+        blank=False,
+        default='user',
+        validators=[validators.validate_profile_group],
         verbose_name='Группа пользователя',
         help_text='Одна из: user, moderator, admin'
     )
+
+    class Meta:
+        verbose_name = "пользователь"
+        verbose_name_plural = "Пользователи"
 
     def __str__(self):
         return self.username
@@ -57,45 +52,60 @@ class Users(AbstractUser):
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGTH,
         verbose_name='Название',
-        help_text=('Название категории; не более 256 символов')
+        help_text=('Название категории (не более 256 символов)')
     )
     slug = models.SlugField(
         unique=True,
         db_index=True,
         verbose_name='Идентификатор',
-        help_text=('Идентификатор страницы для URL; разрешены символы'
+        help_text=('Идентификатор страницы для URL (разрешены символы'
                    ' латиницы, цифры, дефис и подчёркивание.'
-                   'Не более 50символов')
+                   'Не более 50 символов)')
     )
+
+    class Meta:
+        verbose_name = "жанр"
+        verbose_name_plural = "Жанры"
+
+    def __str__(self):
+        return self.name
 
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGTH,
         verbose_name='Название',
-        help_text=('Название категории; не более 256 символов')
+        help_text=('Название категории (не более 256 символов)')
     )
     slug = models.SlugField(
         unique=True,
         db_index=True,
         verbose_name='Идентификатор',
-        help_text=('Идентификатор страницы для URL; разрешены символы'
+        help_text=('Идентификатор страницы для URL (разрешены символы'
                    ' латиницы, цифры, дефис и подчёркивание.'
-                   'Не более 50символов')
+                   'Не более 50 символов)')
     )
+
+    class Meta:
+        verbose_name = "категория"
+        verbose_name_plural = "Категории"
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGTH,
         verbose_name='Название',
-        help_text=('Название произведения; не более 256 символов')
+        help_text='Название произведения (не более 256 символов)'
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='Год выпуска',
-        help_text=('Год выпуска; целочисленное значение года')
+        validators=[validators.validate_year],
+        help_text='Введите целочисленное значение года'
     )
     description = models.TextField(
         blank=True,
@@ -104,17 +114,21 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        through='GenreTitle',
         related_name='titles',
-        verbose_name='Жанр'
+        verbose_name='Жанр',
+        help_text='Выберите жанр произведения'
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name='Внешний ключ таблицы категория',
-        help_text='string (Slug категории)'
+        help_text='Выберите категорию'
     )
+
+    class Meta:
+        verbose_name = "произведение"
+        verbose_name_plural = "Произведения"
 
     def __str__(self):
         return self.name
@@ -128,7 +142,8 @@ class Review(models.Model):
         related_name='reviews'
     )
     text = models.TextField(
-        'Текст'
+        'Текст',
+        help_text='Введите текст отзыва'
     )
     author = models.ForeignKey(
         Users,
@@ -138,7 +153,17 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         'Оценка',
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
+        validators=[
+            MinValueValidator(
+                1,
+                message='Минимальная оценка равна 1.'
+            ),
+            MaxValueValidator(
+                10,
+                message='Максимальная оценка равна 10.'
+            )
+        ],
+        help_text='Поставьте оценку от 1 до 10'
     )
     pub_date = models.DateTimeField(
         'Дата и время публикации',
@@ -154,6 +179,9 @@ class Review(models.Model):
                 name='one_review'
             ),
         )
+
+    def __str__(self):
+        return self.text
 
 
 class Comment(models.Model):
@@ -175,10 +203,9 @@ class Comment(models.Model):
         auto_now_add=True
     )
 
-
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    class Meta:
+        verbose_name = "комментарий"
+        verbose_name_plural = "Комментарии"
 
     def __str__(self):
-        return f'{self.genre} {self.title}'
+        return self.text

@@ -1,11 +1,12 @@
+import re
+from http import HTTPStatus
+
 from django.core.mail import EmailMessage
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from http import HTTPStatus
-import re
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Users
 

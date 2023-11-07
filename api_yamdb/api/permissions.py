@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from reviews.models import Users
 
@@ -14,31 +14,16 @@ def is_admin_user(request):
 class UserPermissions(BasePermission):
 
     def has_permission(self, request, view):
-        if (request.user.is_authenticated
-                and is_admin_user(request) == 'admin'):
-            return True
-        else:
-            return False
-
-    def has_object_permission(self, request, view, obj):
-        if (request.user.is_authenticated
-                and is_admin_user(request) == 'admin'):
-            return True
-        else:
-            return False
+        return (request.user.is_authenticated
+                and is_admin_user(request) == 'admin')
 
 
 class CommonTopicsPermissions(BasePermission):
 
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS
-                or (request.user.is_authenticated
-                    and is_admin_user(request) == 'admin'))
-
-    def has_object_permission(self, request, view, obj):
-        return (request.method in SAFE_METHODS
-                or (request.user.is_authenticated
-                    and is_admin_user(request) == 'admin'))
+                or request.user.is_authenticated
+                    and is_admin_user(request) == 'admin')
 
 
 class ContentPermissions(BasePermission):
