@@ -1,0 +1,42 @@
+Комментарии к замечаниям:
+
+Models.py
+*****************
+Код:
+33 class Users(AbstractUser): 
+34 username = models.CharField(max_length=150,..
+
+Замечание:
+Это свойство унаследовано от AbstractUser, при чем, унаследованное свойство более универсально и красивое, для этого стоит взглянуть на исходный код.
+https://github.com/django/django/blob/main/django/contrib/auth/models.py
+Что бы сохранить красоту поля username при наследовали модели юзера.
+Делаем валидацию на me в clean методе модели, но не забудьте использовать super() что бы не потерять унаследованную функциональность:
+https://docs.djangoproject.com/en/4.1/ref/models/instances/#django.db.models.Model.cleanhttps://github.com/django/django/blob/main/django/contrib/auth/models.py
+
+Комментарий:
+В рамках устранения замечания по строке 18 (Для проверки юзернейма в джанго уже есть валидатор, я думаю он в нашем проекте полностью нас устраивает.) в моделе Users валидация была переделана на UnicodeUsernameValidator() с которой все прекрасно работает. Если требуется реализовать что-то другое, то прошу предоставить ссылку на учебный материал или более четкую инструкцию.
+
+**************************
+
+Код:
+44 first_name = models.CharField(max_length=150,
+
+Замечание:
+фирст_нейм и ласт_нейм аналогично юзернейму.
+
+Комментарий:
+По условию, first_name и last_name могут быть пустыми исходя из чего при проверке UnicodeUsernameValidator() возникает ошибка.
+
+***************************
+Код:
+46 bio = models.CharField(max_length=500, null=True, blank=True)
+47 role = models.CharField( 
+
+Замечание:
+Роли делаем частью модели юзеров, как рекомендовано в доке. https://django.fun/docs/django/ru/4.0/ref/models/fields/#choices
+Это решит проблему валидации данных. И мы всегда будем в рамках разрешенных ролей.
+
+Комментарий:
+Несуществующая ссылка (404 The page you are looking for can't be found. Try our Homepage.). Нужны детальные пояснения к замечанию, что не так с валидацией.
+
+

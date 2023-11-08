@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -8,17 +9,19 @@ from api_yamdb.constants import (MAX_LENGTH, MAX_LENGTH_BIO, MAX_LENGTH_EMAIL,
 
 
 class Users(AbstractUser):
+
+    username_validator = UnicodeUsernameValidator()
+
     username = models.CharField(
         max_length=MAX_LENGTH_NAME,
         blank=False,
         unique=True,
-        validators=[validators.validate_user_name]
+        validators=[username_validator]
     )
     email = models.EmailField(
         max_length=MAX_LENGTH_EMAIL,
         blank=False,
-        unique=True,
-        validators=[validators.validate_user_name]
+        unique=True
     )
     first_name = models.CharField(
         max_length=MAX_LENGTH_NAME,
@@ -41,13 +44,16 @@ class Users(AbstractUser):
         verbose_name='Группа пользователя',
         help_text='Одна из: user, moderator, admin'
     )
+    is_admin = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "пользователь"
         verbose_name_plural = "Пользователи"
 
-    def __str__(self):
-        return self.username
+    def save(self, **kwargs):
+        if self.is_superuser or self.role == 'admin':
+            self.is_admin = True
+        super().save(**kwargs)
 
 
 class Genre(models.Model):
@@ -69,9 +75,6 @@ class Genre(models.Model):
         verbose_name = "жанр"
         verbose_name_plural = "Жанры"
 
-    def __str__(self):
-        return self.name
-
 
 class Category(models.Model):
     name = models.CharField(
@@ -91,9 +94,6 @@ class Category(models.Model):
     class Meta:
         verbose_name = "категория"
         verbose_name_plural = "Категории"
-
-    def __str__(self):
-        return self.name
 
 
 class Title(models.Model):
@@ -129,9 +129,6 @@ class Title(models.Model):
     class Meta:
         verbose_name = "произведение"
         verbose_name_plural = "Произведения"
-
-    def __str__(self):
-        return self.name
 
 
 class Review(models.Model):
@@ -180,9 +177,6 @@ class Review(models.Model):
             ),
         )
 
-    def __str__(self):
-        return self.text
-
 
 class Comment(models.Model):
     review = models.ForeignKey(
@@ -206,6 +200,3 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "комментарий"
         verbose_name_plural = "Комментарии"
-
-    def __str__(self):
-        return self.text

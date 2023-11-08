@@ -1,5 +1,5 @@
 from api.mixins import UpdateModelMixin
-from api.permissions import UserPermissions
+from api.permissions import UserIsAdminPermissions
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -20,7 +20,7 @@ class UsersModelViewSet(
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     lookup_field = 'username'
-    permission_classes = (UserPermissions, )
+    permission_classes = (UserIsAdminPermissions, )
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username', )
 
