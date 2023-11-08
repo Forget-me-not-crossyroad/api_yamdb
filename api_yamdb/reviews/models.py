@@ -14,13 +14,11 @@ class Users(AbstractUser):
 
     username = models.CharField(
         max_length=MAX_LENGTH_NAME,
-        blank=False,
         unique=True,
         validators=[username_validator]
     )
     email = models.EmailField(
         max_length=MAX_LENGTH_EMAIL,
-        blank=False,
         unique=True
     )
     first_name = models.CharField(
@@ -33,12 +31,10 @@ class Users(AbstractUser):
     )
     bio = models.CharField(
         max_length=MAX_LENGTH_BIO,
-        null=True,
         blank=True
     )
     role = models.CharField(
         max_length=MAX_LENGTH_ROLE,
-        blank=False,
         default='user',
         validators=[validators.validate_profile_group],
         verbose_name='Группа пользователя',
