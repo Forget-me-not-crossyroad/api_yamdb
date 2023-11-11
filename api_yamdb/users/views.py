@@ -1,26 +1,27 @@
-from api.mixins import UpdateModelMixin
-from api.permissions import UserIsAdminPermissions
+from django.contrib.auth import get_user_model
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.mixins import UpdateModelMixin
+from api.permissions import IsAdminUser
 from .serializers import UsersSerializer
-from reviews.models import Users
+
+Users = get_user_model()
 
 
-class UsersModelViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    UpdateModelMixin,
-    viewsets.GenericViewSet
-):
+class UserAccessesModel(mixins.CreateModelMixin, mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin, mixins.DestroyModelMixin,
+                        UpdateModelMixin, viewsets.GenericViewSet):
+    pass
+
+
+class UsersModelViewSet(UserAccessesModel):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     lookup_field = 'username'
-    permission_classes = (UserIsAdminPermissions, )
+    permission_classes = (IsAdminUser, )
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username', )
 
@@ -41,7 +42,6 @@ class UsersModelViewSet(
                                          data=request.data,
                                          partial=True)
 
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(role=self.request.user.role)
-            return Response(serializer.data,
-                            status=status.HTTP_200_OK)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=self.request.user.role)
+        return Response(serializer.data, status=status.HTTP_200_OK)

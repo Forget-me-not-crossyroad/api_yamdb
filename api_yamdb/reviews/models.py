@@ -1,33 +1,24 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from . import validators
-from api_yamdb.constants import (MAX_LENGTH, MAX_LENGTH_BIO, MAX_LENGTH_EMAIL,
-                                 MAX_LENGTH_NAME, MAX_LENGTH_ROLE)
+from api_yamdb.constants import (MAX_LENGTH, MAX_LENGTH_BIO,
+                                 MAX_LENGTH_EMAIL, MAX_LENGTH_ROLE)
+
+USER_GROUPS = (
+    ('user', 'User'),
+    ('moderator', 'Moderator'),
+    ('admin', 'Admin')
+)
 
 
 class Users(AbstractUser):
 
-    username_validator = UnicodeUsernameValidator()
-
-    username = models.CharField(
-        max_length=MAX_LENGTH_NAME,
-        unique=True,
-        validators=[username_validator]
-    )
     email = models.EmailField(
         max_length=MAX_LENGTH_EMAIL,
         unique=True
-    )
-    first_name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
-        blank=True
-    )
-    last_name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
-        blank=True
     )
     bio = models.CharField(
         max_length=MAX_LENGTH_BIO,
@@ -36,20 +27,28 @@ class Users(AbstractUser):
     role = models.CharField(
         max_length=MAX_LENGTH_ROLE,
         default='user',
-        validators=[validators.validate_profile_group],
+        choices=USER_GROUPS,
         verbose_name='Группа пользователя',
         help_text='Одна из: user, moderator, admin'
     )
-    is_admin = models.BooleanField(default=False)
+
+    @property
+    def is_admin(self):
+        return self.is_superuser or self.role == 'admin'
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
+    def clean(self):
+
+        if self.role == 'me':
+            raise ValidationError(
+                {'username': '"me" не может быть именем пользователя.'})
 
     class Meta:
         verbose_name = "пользователь"
         verbose_name_plural = "Пользователи"
-
-    def save(self, **kwargs):
-        if self.is_superuser or self.role == 'admin':
-            self.is_admin = True
-        super().save(**kwargs)
 
 
 class Genre(models.Model):

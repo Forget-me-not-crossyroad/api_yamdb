@@ -3,6 +3,7 @@ from http import HTTPStatus
 from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -24,24 +25,16 @@ def send_confirmation_code(request):
     serializer = UsersSerializer(data={'username': username, 'email': email})
 
     if not serializer.is_valid():
-        if Users.objects.filter(username=username,
-                                email=email,
-                                is_active=True).exists():
-            user = Users.objects.get(username=username, is_active=True)
-        else:
-            return Response(
-                {'email': ['Проверьте заполнение.'],
-                 'username': ['Проверьте заполнение.']},
-                status=status.HTTP_400_BAD_REQUEST)
-    elif username == 'me':
-        return Response(
-            {'email': ['Проверьте заполнение.'],
-             'username': ['Проверьте заполнение.']},
-            status=status.HTTP_400_BAD_REQUEST)
+        if not Users.objects.filter(username=username,
+                                    email=email,
+                                    is_active=True).exists():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
     else:
-        user = Users.objects.create_user(username, email)
+        serializer.save()
 
-    token = default_token_generator.make_token(user)
+    token = default_token_generator.make_token(
+        Users.objects.get(username=username))
 
     msg = EmailMessage(f'Код подтверждения для {username}.',
                        f'Ваш код подтверждения: {token}',
@@ -59,8 +52,7 @@ def obtain_token(request):
         return Response({'username': ['Отсутствует поле username.'], },
                         status=status.HTTP_400_BAD_REQUEST)
 
-    user = Users.objects.filter(username=request.data.get('username'),
-                                is_active=True).first()
+    user = get_object_or_404(Users, username=request.data.get('username'))
 
     if not user:
         return Response({'username': ['Пользователь не найден'], },
@@ -74,5 +66,5 @@ def obtain_token(request):
         content = {'token': str(refresh.access_token), }
         return Response(content, status=status.HTTP_200_OK)
     else:
-        return Response({'token': ['Неверный токен.'], },
+        return Response({'token': ['Неверный код подтверждения.'], },
                         status=status.HTTP_400_BAD_REQUEST)
