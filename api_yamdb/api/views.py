@@ -2,7 +2,6 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
-from reviews.models import Category, Genre, Title
 
 from .filters import TitleFilter
 from .mixins import UpdateModelMixin
@@ -10,6 +9,7 @@ from .permissions import CommonTopicsPermissions, ContentPermissions
 from .serializers import (CategoriesSerializer, CommentsSerializer,
                           GenresSerializer, ReviewsSerializer,
                           TitlesGetSerializer, TitlesWriteSerializer)
+from reviews.models import Category, Genre, Title
 
 
 class ReviewsViewSet(
