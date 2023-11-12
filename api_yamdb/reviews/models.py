@@ -1,10 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from . import validators
 from api_yamdb.constants import MAX_LENGTH
-from django.contrib.auth import get_user_model
 
+from . import validators
 
 Users = get_user_model()
 

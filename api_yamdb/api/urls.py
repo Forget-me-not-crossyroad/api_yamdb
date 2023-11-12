@@ -1,10 +1,10 @@
+from authorization.views import obtain_token, send_confirmation_code
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
+from users.views import UsersModelViewSet
 
 from .views import (CategoriesViewSet, CommentsViewSet, GenresViewSet,
                     ReviewsViewSet, TitlesViewSet)
-from authorization.views import send_confirmation_code, obtain_token
-from users.views import UsersModelViewSet
 
 router_v1 = SimpleRouter()
 router_v1.register(

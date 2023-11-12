@@ -1,15 +1,14 @@
 from http import HTTPStatus
 
-from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from users.serializers import UsersSerializer
 
 Users = get_user_model()

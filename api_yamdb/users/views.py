@@ -1,11 +1,11 @@
+from api.mixins import UpdateModelMixin
+from api.permissions import IsAdminUser
 from django.contrib.auth import get_user_model
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.mixins import UpdateModelMixin
-from api.permissions import IsAdminUser
 from .serializers import UsersSerializer
 
 Users = get_user_model()

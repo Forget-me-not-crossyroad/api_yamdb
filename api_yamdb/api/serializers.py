@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-
+from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title
+
+from .default_values import CurrentTitleDefault
 
 CATEGORIES_CHOICES = {'Фильмы', 'Книги', 'Музыка'}
 
@@ -57,23 +59,24 @@ class TitlesGetSerializer(serializers.ModelSerializer):
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(slug_field='username', read_only=True)
+    author = SlugRelatedField(
+        slug_field='username',
+        queryset=Users.objects.all(),
+        default=serializers.CurrentUserDefault()
+    )
+    title = serializers.HiddenField(default=CurrentTitleDefault())
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only_fields = ('id',)
-
-    def validate(self, data):
-        if (Review.objects.filter(
-                author=self.context.get('request').user,
-                title=self.context.get('view').kwargs.get('title_id')).exists()
-                and self.context.get('request').method == 'POST'):
-            raise serializers.ValidationError(
-                'Вы можете оставить только один отзыв на произведение'
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
+        read_only_fields = ('id', )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=['title', 'author'],
+                message='Вы можете оставить только один отзыв на произведение'
             )
-
-        return data
+        ]
 
 
 class CommentsSerializer(serializers.ModelSerializer):
