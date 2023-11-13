@@ -17,7 +17,6 @@ class UsersSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-
         if self.initial_data.get('username') == 'me':
             raise serializers.ValidationError(
                 {'username': '"me" не может быть именем пользователя.'})

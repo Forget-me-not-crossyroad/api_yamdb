@@ -2,13 +2,11 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAdminUser(BasePermission):
-
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_admin
 
 
 class CommonTopicsPermissions(BasePermission):
-
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS
                 or request.user.is_authenticated
@@ -16,7 +14,6 @@ class CommonTopicsPermissions(BasePermission):
 
 
 class ContentPermissions(BasePermission):
-
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS
                 or request.user.is_authenticated)

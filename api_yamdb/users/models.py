@@ -5,10 +5,14 @@ from django.db import models
 from api_yamdb.constants import (MAX_LENGTH_BIO, MAX_LENGTH_EMAIL,
                                  MAX_LENGTH_ROLE)
 
+ADMIN_USER = 'admin'
+DEFAULT_USER = 'user'
+MODERATOR_USER = 'moderator'
+
 USER_GROUPS = (
-    ('user', 'User'),
-    ('moderator', 'Moderator'),
-    ('admin', 'Admin')
+    (DEFAULT_USER, 'User'),
+    (MODERATOR_USER, 'Moderator'),
+    (ADMIN_USER, 'Admin')
 )
 
 
@@ -24,26 +28,26 @@ class Users(AbstractUser):
     )
     role = models.CharField(
         max_length=MAX_LENGTH_ROLE,
-        default='user',
+        default=DEFAULT_USER,
         choices=USER_GROUPS,
         verbose_name='Группа пользователя',
-        help_text='Одна из: user, moderator, admin'
+        help_text=f'Одна из: {DEFAULT_USER}, {MODERATOR_USER}, {ADMIN_USER}'
     )
-
-    @property
-    def is_admin(self):
-        return self.is_superuser or self.role == 'admin'
-
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
-
-    def clean(self):
-
-        if self.role == 'me':
-            raise ValidationError(
-                {'username': '"me" не может быть именем пользователя.'})
 
     class Meta:
         verbose_name = "пользователь"
         verbose_name_plural = "Пользователи"
+
+    @property
+    def is_admin(self):
+        return self.is_superuser or self.role == ADMIN_USER
+
+    @property
+    def is_moderator(self):
+        return self.role == MODERATOR_USER
+
+    def clean(self):
+        if self.username == 'me':
+            raise ValidationError(
+                {'username': '"me" не может быть именем пользователя.'})
+        super().clean()

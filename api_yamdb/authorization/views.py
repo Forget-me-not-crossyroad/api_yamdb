@@ -64,6 +64,6 @@ def obtain_token(request):
         refresh = RefreshToken.for_user(user)
         content = {'token': str(refresh.access_token), }
         return Response(content, status=status.HTTP_200_OK)
-    else:
-        return Response({'token': ['Неверный код подтверждения.'], },
-                        status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'token': ['Неверный код подтверждения.'], },
+                    status=status.HTTP_400_BAD_REQUEST)
