@@ -65,7 +65,9 @@ class ReviewsSerializer(serializers.ModelSerializer):
         queryset=Users.objects.all(),
         default=serializers.CurrentUserDefault()
     )
-    title = serializers.HiddenField(default=CurrentTitleDefault())
+    title = serializers.HiddenField(
+        default=CurrentTitleDefault(),
+        write_only=True)
 
     class Meta:
         model = Review
